@@ -92,27 +92,27 @@ def generar_llaves(rango_inferior, rango_superior):
     clave_privada = (d, n)
     return clave_publica, clave_privada
 
-# Función para encriptar un número usando la clave pública
-def encriptar(numero, clave_publica):
+# Función para encriptar un carácter o número usando la clave pública
+def encriptar_caracter(caracter, clave_publica):
     e, n = clave_publica
-    if not isinstance(numero, int) or numero <= 0:
-        print("Error: El número a encriptar debe ser un entero positivo.") # Se valida que el número sea un número entero positivo.
-        return None
-    if numero >= n:
-        print("Error: El número a encriptar debe ser menor que n.") # Se valida que el número sea menor que n.
-        return None
-    return pow(numero, e, n)
+    ascii_val = ord(caracter)
+    return pow(ascii_val, e, n)
 
-# Función para desencriptar un número encriptado usando la clave privada
-def desencriptar(numero_encriptado, clave_privada):
+# Función para desencriptar un carácter encriptado usando la clave privada
+def desencriptar_caracter(valor_encriptado, clave_privada):
     d, n = clave_privada
-    if not isinstance(numero_encriptado, int) or numero_encriptado <= 0: # Se valida que el número sea un número entero positivo.
-        print("Error: El número encriptado debe ser un entero positivo.")
-        return None
-    if numero_encriptado >= n:
-        print("Error: El número encriptado debe ser menor que n.") # Se valida que el número sea menor que n.
-        return None
-    return pow(numero_encriptado, d, n)
+    ascii_val = pow(valor_encriptado, d, n)
+    return chr(ascii_val)
+
+# Función para encriptar un mensaje completo
+def encriptar_mensaje(mensaje, clave_publica):
+    mensaje_encriptado = [encriptar_caracter(caracter, clave_publica) for caracter in mensaje]
+    return mensaje_encriptado
+
+# Función para desencriptar un mensaje completo
+def desencriptar_mensaje(mensaje_encriptado, clave_privada):
+    mensaje_desencriptado = ''.join([desencriptar_caracter(caracter, clave_privada) for caracter in mensaje_encriptado])
+    return mensaje_desencriptado
 
 # Función donde el programa arranca
 if __name__ == "__main__":
@@ -127,29 +127,13 @@ if __name__ == "__main__":
         print("Clave Pública (e, n):", clave_publica)
         print("Clave Privada (d, n):", clave_privada)
 
-        try:
-            # Se solicita al usuario que ingrese el número que desea encriptar
-            numero = int(input("\nIntroduce un número para encriptar (debe ser menor que n): "))
-            numero_encriptado = encriptar(numero, clave_publica)
-            if numero_encriptado is not None:
-                print("Número encriptado:", numero_encriptado)
+        # Solicitar al usuario que ingrese el mensaje que desea encriptar
+        mensaje = input("\nIntroduce un mensaje para encriptar: ")
+        mensaje_encriptado = encriptar_mensaje(mensaje, clave_publica)
+        print("Mensaje encriptado:", mensaje_encriptado)
 
-                # Se solicita el número encriptado y clave privada para desencriptar
-                numero_a_desencriptar = int(input("\nIntroduce el número encriptado para desencriptar: "))
-                d_ingresado = int(input("Introduce el valor de 'd' de la clave privada: "))
-                n_ingresado = int(input("Introduce el valor de 'n' de la clave privada: "))
-
-                # Se verifica si la clave privada ingresada es correcta
-                if (d_ingresado, n_ingresado) == clave_privada:
-                    numero_desencriptado = desencriptar(numero_a_desencriptar, clave_privada)
-                    print("Número desencriptado:", numero_desencriptado)
-                else:
-                    print("Error: La clave privada ingresada es incorrecta.")
-            else:
-                print("Error: No se pudo encriptar el número.") # Mensaje de error 
-
-        except ValueError:
-            print("Por favor, introduce un número válido.")
-
+        # Solicitar al usuario que ingrese el mensaje encriptado para desencriptar
+        mensaje_desencriptado = desencriptar_mensaje(mensaje_encriptado, clave_privada)
+        print("Mensaje desencriptado:", mensaje_desencriptado)
     else:
         print("Error en la generación de claves.")
