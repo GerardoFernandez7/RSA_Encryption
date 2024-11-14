@@ -1,17 +1,6 @@
 import random
 import math
 
-# José Gerardo Ruiz García - 23719
-# Gerardo André Fernández Cruz - 23763
-# Andrés Alberto Mazariegos Escobar - 21749
-
-# FLUJO DEL PROGRAMA
-# 1. Genera claves pública y privada (RSA).
-# 2. Muestra las claves al usuario.
-# 3. Solicita un número para encriptar y lo muestra encriptado.
-# 4. Pide al usuario ingresar el número encriptado y la clave privada.
-# 5. Desencripta el número si la clave privada es correcta, mostrando el resultado o un mensaje de error si es incorrecta.
-
 # Función para verificar si un número es primo.
 def es_primo(num):
     if num < 2:
@@ -42,7 +31,6 @@ def mcd(a, b):
     return abs(a)
 
 # Función para calcular el inverso modular utilizando el algoritmo extendido de Euclides
-# Donde quiero encontrar el inverso de e en modulo phi_n
 def inverso_modular(e, phi_n):
     t, new_t = 0, 1
     r, new_r = phi_n, e
@@ -70,24 +58,19 @@ def generar_llaves(rango_inferior, rango_superior):
             print("Error: no se pudo encontrar un número primo diferente a p.")
             return None
 
-    # Se multiplica p y q para saber en que mod se encriptará y se desencriptará
     n = p * q
-    # Totiente de euler
     phi_n = (p - 1) * (q - 1)
-    # Cálculo de e para la llave publica
     e = random.randint(2, phi_n - 1)
 
     while mcd(e, phi_n) != 1:
         e = random.randint(2, phi_n - 1)
 
-    # Cálculo de d para la llave privada
     d = inverso_modular(e, phi_n)
 
     if d is None:
         print("Error al calcular el inverso modular; no se pudo generar las llaves.")
         return None
 
-    # Creación de tuplas de las claves
     clave_publica = (e, n)
     clave_privada = (d, n)
     return clave_publica, clave_privada
@@ -116,7 +99,6 @@ def desencriptar_mensaje(mensaje_encriptado, clave_privada):
 
 # Función donde el programa arranca
 if __name__ == "__main__":
-    # Se establece el rango de los números en los que se generán los números primos
     rango_inferior = 50
     rango_superior = 100
 
@@ -127,13 +109,26 @@ if __name__ == "__main__":
         print("Clave Pública (e, n):", clave_publica)
         print("Clave Privada (d, n):", clave_privada)
 
-        # Solicitar al usuario que ingrese el mensaje que desea encriptar
-        mensaje = input("\nIntroduce un mensaje para encriptar: ")
-        mensaje_encriptado = encriptar_mensaje(mensaje, clave_publica)
-        print("Mensaje encriptado:", mensaje_encriptado)
+        while True:  # Ciclo para permitir ingresar mensajes repetidamente
+            # Solicitar al usuario que ingrese el mensaje que desea encriptar
+            mensaje = input("\nIntroduce un mensaje para encriptar (o 'salir' para salir): ")
 
-        # Solicitar al usuario que ingrese el mensaje encriptado para desencriptar
-        mensaje_desencriptado = desencriptar_mensaje(mensaje_encriptado, clave_privada)
-        print("Mensaje desencriptado:", mensaje_desencriptado)
+            if mensaje.lower() == 'salir':
+                print("Saliendo del programa.")
+                break
+
+            mensaje_encriptado = encriptar_mensaje(mensaje, clave_publica)
+            print("\nMensaje encriptado:", mensaje_encriptado)
+
+            # Pedir la clave privada para desencriptar
+            clave_privada_ingresada = input("\nIntroduce la clave privada (d, n) para desencriptar el mensaje (d, n): ")
+            clave_privada_ingresada = tuple(map(int, clave_privada_ingresada.split(',')))
+
+            # Verificar si la clave privada ingresada es correcta
+            if clave_privada_ingresada == clave_privada:
+                mensaje_desencriptado = desencriptar_mensaje(mensaje_encriptado, clave_privada_ingresada)
+                print("\nMensaje desencriptado:", mensaje_desencriptado)
+            else:
+                print("\nError: La clave privada ingresada es incorrecta.")
     else:
         print("Error en la generación de claves.")
